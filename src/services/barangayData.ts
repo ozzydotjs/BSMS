@@ -50,7 +50,7 @@ export async function fetchHouseholds(): Promise<Household[]> {
 export async function fetchResidents(): Promise<Resident[]> {
   const { data, error } = await supabase
     .from('residents')
-    .select('id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households(id, address, purok)')
+    .select('id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households!residents_household_id_fkey(id, address, purok)')
     .order('last_name', { ascending: true });
   if (error) throw new Error(error.message);
   return (data ?? []) as unknown as Resident[];
@@ -68,7 +68,7 @@ export async function fetchResidentsPaginated(
   let query = supabase
     .from('residents')
     .select(
-      'id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households(id, address, purok)',
+      'id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households!residents_household_id_fkey(id, address, purok)',
       { count: 'exact' }
     )
     .order('last_name', { ascending: true })
@@ -96,7 +96,7 @@ export async function createResident(input: ResidentInput): Promise<Resident> {
       household_id: input.household_id,
       contact_number: input.contact_number.trim(),
     })
-    .select('id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households(id, address, purok)')
+    .select('id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households!residents_household_id_fkey(id, address, purok)')
     .single();
 
   if (error) throw new Error(error.message);
@@ -114,7 +114,7 @@ export async function updateResident(residentId: string, input: ResidentInput): 
       contact_number: input.contact_number.trim(),
     })
     .eq('id', residentId)
-    .select('id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households(id, address, purok)')
+    .select('id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households!residents_household_id_fkey(id, address, purok)')
     .single();
 
   if (error) throw new Error(error.message);
@@ -137,7 +137,7 @@ export async function updateResidentContact(
     .from('residents')
     .update({ contact_number: contactNumber.trim() })
     .eq('id', residentId)
-    .select('id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households(id, address, purok)')
+    .select('id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households!residents_household_id_fkey(id, address, purok)')
     .single();
 
   if (error) throw new Error(error.message);
@@ -169,7 +169,7 @@ export async function fetchResidentRequestsByProfile(
 ): Promise<{ resident: Resident | null; requests: DocumentRequest[] }> {
   const { data: residentData, error: residentErr } = await supabase
     .from('residents')
-    .select('id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households(id, address, purok)')
+    .select('id, profile_id, first_name, last_name, birthdate, household_id, contact_number, households!residents_household_id_fkey(id, address, purok)')
     .eq('profile_id', profileId)
     .maybeSingle();
 
